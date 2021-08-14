@@ -93,7 +93,9 @@ Wenn Pico Go sich nicht mit dem Pico verbinden mag, muss Minicom verwendet werde
 # Links
 
 https://www.heise.de/developer/artikel/Gutes-Wetter-mit-Raspberry-Pi-Pico-MicroPython-und-Visual-Studio-Code-5066047.html
+
 http://pico-go.net/docs/start/quick/
+
 https://datasheets.raspberrypi.org/pico/getting-started-with-pico.pdf
 
 
