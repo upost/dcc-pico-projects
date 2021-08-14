@@ -4,7 +4,7 @@ Software-Decoder für preisgünstige Lichtsignal-Ansteuerung mit Raspberry Pico
 
 von Uwe Post
 
-https://github.com/upost
+https://github.com/upost/dcc-pico-projects
 
 # Allgemeines
 
