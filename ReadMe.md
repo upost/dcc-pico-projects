@@ -58,8 +58,8 @@ In Klammern stehen drei Parameter:
 3. Typ des Signals. Vorgesehen sind derzeit H/V-Lichtsignale: SIGNAL_HAUPTSIGNAL1 (Blocksignal, nur grün und rot), SIGNAL_HAUPTSIGNAL2 (Einfahrsignal, grün, rot, orange), SIGNAL_AUSFAHRSIGNAL (Ausfahrsignal, grün, rot, orange, rot, weiß) Die angegebene Reihenfolge der Signalfarben entspricht jener der LEDs.
 
 Achten Sie darauf, keine Ausgangspins mehrfach zu verwenden. Wenn Ihr signal1 ein Ausfahrsignal ist mit 
-ersten Pin 2, benötigt es die Pins 2 (grün), 3 (rot links), 4 (orange), 5 (rot rechts) und
- 6 (weiße LEDs des Rangiersignals). Demzufolge müsste das nächste Signal bei Ausgangspin 7 anfangen.
+ersten Ausgangspin GP2, benötigt es die Pins GP2 (grün), GP3 (rot links), GP4 (orange), GP5 (rot rechts) und
+ GP6 (weiße LEDs des Rangiersignals). Demzufolge müsste das nächste Signal bei Ausgangspin GP7 anfangen.
 
 Sie können mehr als die 3 im gegebenen Code verwendeten Signale deklarieren, kopieren Sie dazu einfach die Zeile
 und nennen Sie das nächste Signal signal4, signal5 usw. 
@@ -69,7 +69,7 @@ Falls Sie mehr als drei Signale verwenden, schreiben Sie sie einfach mit in die 
 
 
 Hinweis: Der im Code verwendete BUTTON (Pin 27) ist zu Testzwecken eingebaut. Wenn Sie einen Taster an den Pin
-anschließen, können Sie damit die Signalbilder manuell durchschalten.
+und Masse anschließen, können Sie damit die Signalbilder manuell durchschalten.
 
 
 # Build:
@@ -80,7 +80,9 @@ oder
 
 `make -j4`
 
-im richtigen Verzeichnis (build)
+im richtigen Verzeichnis (build). Eventuell ist zuvor ein `make clean` nötig.
+
+Das resultierende Artefakt liegt im Verzeichnis build/dcc3signal und heißt dcc3signal.uf2.
 
 # Debugging mit Minicom
 
