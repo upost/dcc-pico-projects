@@ -14,12 +14,14 @@
 #define SIGNAL_HP2 2
 #define SIGNAL_HP0SH1 3
 
+#define SIGNAL_INVERSE 1
+
 
 
 
 class Signal : public Device {
     private:
-     int led_green,led_red1,led_red2,led_orange,led_white,mode,current;
+     int led_green,led_red1,led_red2,led_orange,led_white,mode,current,inverse;
 
      void set_lights(int red1,int green,int orange, int red2, int white);
      int last();
@@ -27,7 +29,7 @@ class Signal : public Device {
     public:
      Signal(int _address, int _led_base, int _mode);
 
-     void init();
+     void init(int _inverse=0);
 
      void test();
 

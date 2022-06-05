@@ -28,6 +28,7 @@ Signal::Signal(int _address, int _led_base, int _mode) : Device((_address-1)/4)
          led_red2 = _led_base+3;
          led_white = _led_base+4;
          current=0;
+         inverse =0;
 }
 
 void Signal::test() {
@@ -42,7 +43,10 @@ void Signal::test() {
     switch_to(SIGNAL_HP0);
 }
 
-void Signal::init() {
+
+
+void Signal::init(int _inverse) {
+    inverse=_inverse;
     gpio_init(led_green);
     gpio_init(led_red1);
     gpio_init(led_red2);
@@ -66,11 +70,11 @@ void Signal::init() {
 
 // internal function for setting of lights. use light_on or light_off for parameters, not 0/1!
 void Signal::set_lights(int red1, int green,int orange, int red2, int white) {
-    gpio_put(led_red1,red1);
-    gpio_put(led_red2,red2);
-    gpio_put(led_green,green);
-    gpio_put(led_orange,orange);
-    gpio_put(led_white,white);
+    gpio_put(led_red1,inverse?(1-red1):red1);
+    gpio_put(led_red2,inverse?(1-red2):red2);
+    gpio_put(led_green,inverse?(1-green):green);
+    gpio_put(led_orange,inverse?(1-orange):orange);
+    gpio_put(led_white,inverse?(1-white):white);
 }
 
 // switch to Signalbild SIGNAL_HP0, SIGNAL_HP1 etc.

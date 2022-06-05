@@ -16,6 +16,7 @@
 
 int main() {
 
+    
     stdio_init_all();
 
     gpio_init(STATUS_LED);
@@ -26,18 +27,17 @@ int main() {
     // GPIO 0+1 reserved for USB serial
 
     
-    Signal signal1(49, 2, SIGNAL_AUSFAHRSIGNAL); // GPIO 2 3 4 5 6
+    Signal signal1(37, 2, SIGNAL_AUSFAHRSIGNAL); // GPIO 2 3 4 5 6
     signal1.init();
 
-    Signal signal2(45,7,SIGNAL_AUSFAHRSIGNAL); // GPIO 7 8 9 10 11
+    Signal signal2(33,7,SIGNAL_AUSFAHRSIGNAL); // GPIO 7 8 9 10 11
     signal2.init();
 
-    Signal signal3(41,16,SIGNAL_HAUPTSIGNAL1); // GPIO 16 17 18 19 20
-    signal3.init();
+    Signal signal3(9,16,SIGNAL_AUSFAHRSIGNAL); // GPIO 16 17 18 19 20
+    signal3.init(SIGNAL_INVERSE);
 
-    // Signal signal4(94,21,SIGNAL_AUSFAHRSIGNAL); // pins 21 22 24 25 26
-    // signal4.init();
-
+    Signal signal4(65,14,SIGNAL_HAUPTSIGNAL1); // GPIO 14 15
+    signal4.init();
 
     // init buttons
     gpio_init(BUTTON1);
@@ -48,9 +48,9 @@ int main() {
     signal1.test();
     signal2.test();
     signal3.test();
-    //signal4.test();
+    signal4.test();
 
-    Device* signals[] = {&signal1,&signal2,&signal3};
+    Device* signals[] = {&signal1,&signal2,&signal3,&signal4};
     DCCDetector detector(DCC_IN, signals, sizeof(signals)/sizeof(Device*) );
 
     gpio_put(STATUS_LED,0);
@@ -62,6 +62,9 @@ int main() {
     while(true) {
         if(!gpio_get(BUTTON1)) {
             signal1.switch_next();
+            signal2.switch_next();
+            signal3.switch_next();
+            signal4.switch_next();
             sleep_ms(500);             
         }
     }

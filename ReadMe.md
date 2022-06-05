@@ -30,6 +30,10 @@ Das Programm liegt als Quellcode vor. Um daraus Binärcode zu machen, der auf di
 benötigen Sie eine Buildumgebung mit Visual Studio Code. Bitte konsultieren Sie die Links
 in diesem Dokument, um herauszufinden, wie man das macht.
 
+# Installation auf Pico
+
+Den Arduino Pico mit gedrückter Programmiertaste über USB anschließen, Taste loslassen. Wenn das Explorer-Fenster 
+erschienen ist, die Binärdatei dcc3signal.uf2 draufkopieren. Der Pico startet automatisch neu.
 
 # Beta
 
@@ -59,7 +63,15 @@ In Klammern stehen drei Parameter:
 
 Achten Sie darauf, keine Ausgangspins mehrfach zu verwenden. Wenn Ihr signal1 ein Ausfahrsignal ist mit 
 ersten Ausgangspin GP2, benötigt es die Pins GP2 (grün), GP3 (rot links), GP4 (orange), GP5 (rot rechts) und
- GP6 (weiße LEDs des Rangiersignals). Demzufolge müsste das nächste Signal bei Ausgangspin GP7 anfangen.
+GP6 (weiße LEDs des Rangiersignals). Demzufolge müsste das nächste Signal bei Ausgangspin GP7 anfangen.
+
+Standardmäßig müssen Lichtsignale eine gemeinsame Anode haben, d.h. der gemeinsame Anschluss gehört an die 3,3-Volt Versorgung (Pico-Pin 36).
+Hat ein Lichtsignal eine gemeinsame Kathode, müssen Sie es invertiert initialisieren:
+
+`signal3.init(SIGNAL_INVERSE);`
+
+In dem Fall gehört der gemeinsame Anschluss an einen der GND-Pins des Pico.
+
 
 Sie können mehr als die 3 im gegebenen Code verwendeten Signale deklarieren, kopieren Sie dazu einfach die Zeile
 und nennen Sie das nächste Signal signal4, signal5 usw. 
