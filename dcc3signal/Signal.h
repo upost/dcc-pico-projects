@@ -3,6 +3,7 @@
 
 #include "Device.h"
 
+
 // Konstanten für _mode
 #define SIGNAL_HAUPTSIGNAL1 1
 #define SIGNAL_HAUPTSIGNAL2 2
@@ -22,9 +23,11 @@
 class Signal : public Device {
     private:
      int led_green,led_red1,led_red2,led_orange,led_white,mode,current,inverse;
+     int _green,_red1,_red2,_orange,_white;
 
      void set_lights(int red1,int green,int orange, int red2, int white);
      int last();
+     void start_fade(int gpio,int from,int to);
 
     public:
      Signal(int _address, int _led_base, int _mode);

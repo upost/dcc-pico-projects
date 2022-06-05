@@ -7,7 +7,7 @@ if (TARGET tinyusb_device)
                 )
 
         # Pull in our pico_stdlib which pulls in commonly used features
-        target_link_libraries(dcc3signal pico_stdlib pico_multicore)
+        target_link_libraries(dcc3signal pico_stdlib pico_multicore hardware_pwm)
 
         # enable usb output, disable uart output
         pico_enable_stdio_usb(dcc3signal 1)

@@ -1,11 +1,15 @@
 #include "Signal.h"
 #include <pico/stdlib.h>
 #include <stdio.h>
+#include "hardware/irq.h"
+#include "hardware/pwm.h"
+
 
 #define LIGHT_ON 0
 #define LIGHT_OFF 1
 
 #define TEST_PHASE_MS 200
+#define FADE_DURATION_MS 200
 
 void binprintf(int v)
 {
@@ -16,6 +20,7 @@ void binprintf(int v)
         bit++;
     }
 }
+
 
 
 // SRCPd uses "strange addresses". To get the real DCC accessory address, calculate -1 and /4
@@ -29,6 +34,7 @@ Signal::Signal(int _address, int _led_base, int _mode) : Device((_address-1)/4)
          led_white = _led_base+4;
          current=0;
          inverse =0;
+         _green= _red1 = _red2 = _orange = _white = 0;
 }
 
 void Signal::test() {
@@ -68,18 +74,93 @@ void Signal::init(int _inverse) {
     switch_to(SIGNAL_HP0);
 }
 
+void Signal::start_fade(int gpio,int from,int to) {
+    gpio_function prev = gpio_get_function(gpio);
+    gpio_set_function(gpio, GPIO_FUNC_PWM);
+    uint slice_num = pwm_gpio_to_slice_num(gpio);    
+    pwm_config config = pwm_get_default_config();
+    // Set divider, reduces counter clock to sysclock/this value
+    pwm_config_set_clkdiv(&config, 4.f);
+    // Load the configuration into our PWM slice, and set it running.
+    pwm_init(slice_num, &config, true);
+
+    // fade up
+    if(from<to) {
+        for(int v=0; v<255; v+=4) {
+            pwm_set_gpio_level(gpio,v*v);
+            sleep_us(600);
+        }
+        gpio_set_function(gpio, prev);
+        gpio_put(gpio,to);
+    }
+    // fade down
+    if(from>to) {
+        for(int v=255; v>0; v-=4) {
+            pwm_set_gpio_level(gpio,v*v);
+            sleep_us(1200);
+        }
+        gpio_set_function(gpio, prev);
+        gpio_put(gpio,to);
+    }
+    
+    
+    // test
+    //gpio_put(gpio,to);
+}
+
+
 // internal function for setting of lights. use light_on or light_off for parameters, not 0/1!
 void Signal::set_lights(int red1, int green,int orange, int red2, int white) {
-    gpio_put(led_red1,inverse?(1-red1):red1);
-    gpio_put(led_red2,inverse?(1-red2):red2);
-    gpio_put(led_green,inverse?(1-green):green);
-    gpio_put(led_orange,inverse?(1-orange):orange);
-    gpio_put(led_white,inverse?(1-white):white);
+
+    // what to fade out
+    if(red1 > _red1) { 
+        start_fade(led_red1,inverse?(1-_red1):_red1, inverse?(1-red1):red1);
+        _red1=red1;
+    }
+    if(red2 > _red2) { 
+        start_fade(led_red2,inverse?(1-_red2):_red2, inverse?(1-red2):red2);
+        _red2=red2;
+    }
+    if(green > _green) { 
+        start_fade(led_green,inverse?(1-_green):_green, inverse?(1-green):green);
+        _green=green;
+    }
+    if(orange > _orange) { 
+        start_fade(led_orange,inverse?(1-_orange):_orange, inverse?(1-orange):orange);
+        _orange=orange;
+    }
+    if(white > _white) { 
+        start_fade(led_white,inverse?(1-_white):_white, inverse?(1-white):white);
+        _white=white;
+    }
+
+    // what to fade in
+    if(red1 < _red1) { 
+        start_fade(led_red1,inverse?(1-_red1):_red1, inverse?(1-red1):red1);
+        _red1=red1;
+    }
+    if(red2 < _red2) { 
+        start_fade(led_red2,inverse?(1-_red2):_red2, inverse?(1-red2):red2);
+        _red2=red2;
+    }
+    if(green < _green) { 
+        start_fade(led_green,inverse?(1-_green):_green, inverse?(1-green):green);
+        _green=green;
+    }
+    if(orange < _orange) { 
+        start_fade(led_orange,inverse?(1-_orange):_orange, inverse?(1-orange):orange);
+        _orange=orange;
+    }
+    if(white < _white) { 
+        start_fade(led_white,inverse?(1-_white):_white, inverse?(1-white):white);
+        _white=white;
+    }
+
 }
 
 // switch to Signalbild SIGNAL_HP0, SIGNAL_HP1 etc.
 void Signal::switch_to(int what) {
-    // TODO blend
+
     switch(what) {
         case SIGNAL_HP0: 
             set_lights(LIGHT_ON,LIGHT_OFF,LIGHT_OFF,LIGHT_ON,LIGHT_OFF);
