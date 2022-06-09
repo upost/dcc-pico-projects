@@ -31,6 +31,8 @@ class DCCDetector {
         void process(uint gpio,uint32_t events);
         void start();
         uint getInputPin();
+        uint16_t timing();
+        void debug();
 };
 
 #endif

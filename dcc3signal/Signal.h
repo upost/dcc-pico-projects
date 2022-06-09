@@ -40,7 +40,7 @@ class Signal : public Device {
 
      void switch_next();
      
-     void handleCommand(uint8_t address, uint8_t cmd_data[]) override;
+     bool handleCommand(uint8_t address, uint8_t cmd_data[]) override;
 
 };
 #endif

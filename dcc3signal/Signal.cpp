@@ -2,7 +2,7 @@
 #include <pico/stdlib.h>
 #include <stdio.h>
 #include "hardware/irq.h"
-#include "hardware/pwm.h"
+
 
 
 #define LIGHT_ON 0
@@ -10,6 +10,8 @@
 
 #define TEST_PHASE_MS 200
 #define FADE_DURATION_MS 200
+
+#define DEBUG_SWITCH_TO
 
 void binprintf(int v)
 {
@@ -42,10 +44,15 @@ void Signal::test() {
     sleep_ms(TEST_PHASE_MS);
     switch_to(SIGNAL_HP1);
     sleep_ms(TEST_PHASE_MS);
+    
+    if(current!=last()) {
     switch_to(SIGNAL_HP2);
     sleep_ms(TEST_PHASE_MS);
+    }
+    if(current!=last()) {
     switch_to(SIGNAL_HP0SH1);
     sleep_ms(TEST_PHASE_MS);
+    }
     switch_to(SIGNAL_HP0);
 }
 
@@ -75,7 +82,7 @@ void Signal::init(int _inverse) {
 }
 
 void Signal::start_fade(int gpio,int from,int to) {
-    gpio_function prev = gpio_get_function(gpio);
+    /*gpio_function prev = gpio_get_function(gpio);
     gpio_set_function(gpio, GPIO_FUNC_PWM);
     uint slice_num = pwm_gpio_to_slice_num(gpio);    
     pwm_config config = pwm_get_default_config();
@@ -102,10 +109,10 @@ void Signal::start_fade(int gpio,int from,int to) {
         gpio_set_function(gpio, prev);
         gpio_put(gpio,to);
     }
-    
+    */
     
     // test
-    //gpio_put(gpio,to);
+    gpio_put(gpio,to);
 }
 
 
@@ -163,15 +170,27 @@ void Signal::switch_to(int what) {
 
     switch(what) {
         case SIGNAL_HP0: 
+            #ifdef DEBUG_SWITCH_TO
+                printf("switching %d to hp0\n",address);
+            #endif
             set_lights(LIGHT_ON,LIGHT_OFF,LIGHT_OFF,LIGHT_ON,LIGHT_OFF);
             break;
         case SIGNAL_HP1:
+            #ifdef DEBUG_SWITCH_TO
+                printf("switching %d to hp1\n",address);
+            #endif
             set_lights(LIGHT_OFF,LIGHT_ON,LIGHT_OFF,LIGHT_OFF,LIGHT_OFF);
             break;
         case SIGNAL_HP2:
+            #ifdef DEBUG_SWITCH_TO
+                printf("switching %d to hp2\n",address);
+            #endif
             set_lights(LIGHT_OFF,LIGHT_ON,LIGHT_ON,LIGHT_OFF,LIGHT_OFF);
             break;
         case SIGNAL_HP0SH1:
+            #ifdef DEBUG_SWITCH_TO
+                printf("switching %d to hp0sh1\n",address);
+            #endif
             set_lights(LIGHT_ON,LIGHT_OFF,LIGHT_OFF,LIGHT_OFF,LIGHT_ON);
             break;
     }
@@ -195,7 +214,7 @@ int Signal::last() {
     return SIGNAL_HP2;
 }
 
-void Signal::handleCommand(uint8_t _address, uint8_t cmd_data[]) {
+bool Signal::handleCommand(uint8_t _address, uint8_t cmd_data[]) {
     
     // TODO check error detection byte cmd_data[1]
     
@@ -215,7 +234,7 @@ void Signal::handleCommand(uint8_t _address, uint8_t cmd_data[]) {
         // assume accessory decoder packet
         // calculate effective address and compare to ours
         uint8_t eff_decoderAddress = ((((cmd_data[0]^0b01110000)&(7<<4)))<<6) | _address;
-        if(address != eff_decoderAddress) return;
+        if(address != eff_decoderAddress) return false;
         
         // that's for us!
         // get port, output and check for "on"
@@ -223,16 +242,18 @@ void Signal::handleCommand(uint8_t _address, uint8_t cmd_data[]) {
         uint8_t output = (cmd_data[0]&1);
         uint8_t on = (cmd_data[0]&8)>>3;
         
-        printf("accessory eff_addr=%d on=%d output=%d port=%d\n",eff_decoderAddress,on,output,port);
+        printf("\naccessory eff_addr=%d on=%d output=%d port=%d   \n",eff_decoderAddress,on,output,port);
 
         if(on) {
             if(port==0 && output==0) switch_to(SIGNAL_HP0);
             if(port==0 && output==1) switch_to(SIGNAL_HP1);
             if(port==1 && output==0) switch_to(SIGNAL_HP2);
             if(port==1 && output==1) switch_to(SIGNAL_HP0SH1);
+            return true;
         }
 
     }
+    return false;
 }
 
 
