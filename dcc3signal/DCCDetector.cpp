@@ -103,7 +103,6 @@ DCCDetector::DCCDetector(uint8_t _input_pin, Device* _devices[], uint8_t _device
 }
 
 void DCCDetector::start() {
-//    multicore_launch_core1(listen_for_dcc);
     gpio_set_irq_enabled_with_callback(input_pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &gpio_callback);
 }
 

@@ -1,15 +1,15 @@
-#include "Signal.h"
 #include <pico/stdlib.h>
+#include "Signal.h"
 #include <stdio.h>
 #include "hardware/irq.h"
-
+#include "hardware/pwm.h"
 
 
 #define LIGHT_ON 0
 #define LIGHT_OFF 1
 
 #define TEST_PHASE_MS 200
-#define FADE_DURATION_MS 200
+
 
 #define DEBUG_SWITCH_TO
 
@@ -29,14 +29,17 @@ void binprintf(int v)
 Signal::Signal(int _address, int _led_base, int _mode) : Device((_address-1)/4)
 {
          mode = _mode;
-         led_green = _led_base;
-         led_red1 = _led_base+1;
-         led_orange = _led_base+2;
-         led_red2 = _led_base+3;
-         led_white = _led_base+4;
-         current=0;
-         inverse =0;
+         gpios[0]= led_green = _led_base;
+         gpios[1]= led_red1 = _led_base+1;
+         gpios[2]= led_orange = _led_base+2;
+         gpios[3]= led_red2 = _led_base+3;
+         gpios[4]= led_white = _led_base+4;
+         current = 0;
+         inverse = 0;
          _green= _red1 = _red2 = _orange = _white = 0;
+         for(int i=0; i<FADER_COUNT; i++) {
+            fader[i]= target[i] = 0;
+         }
 }
 
 void Signal::test() {
@@ -82,37 +85,13 @@ void Signal::init(int _inverse) {
 }
 
 void Signal::start_fade(int gpio,int from,int to) {
-    /*gpio_function prev = gpio_get_function(gpio);
-    gpio_set_function(gpio, GPIO_FUNC_PWM);
-    uint slice_num = pwm_gpio_to_slice_num(gpio);    
-    pwm_config config = pwm_get_default_config();
-    // Set divider, reduces counter clock to sysclock/this value
-    pwm_config_set_clkdiv(&config, 4.f);
-    // Load the configuration into our PWM slice, and set it running.
-    pwm_init(slice_num, &config, true);
 
-    // fade up
-    if(from<to) {
-        for(int v=0; v<255; v+=4) {
-            pwm_set_gpio_level(gpio,v*v);
-            sleep_us(600);
-        }
-        gpio_set_function(gpio, prev);
-        gpio_put(gpio,to);
-    }
-    // fade down
-    if(from>to) {
-        for(int v=255; v>0; v-=4) {
-            pwm_set_gpio_level(gpio,v*v);
-            sleep_us(1200);
-        }
-        gpio_set_function(gpio, prev);
-        gpio_put(gpio,to);
-    }
-    */
+    // index of fader is gpio - gpios[0]
+    target[gpio-gpios[0]]=to*100;
+    fader[gpio-gpios[0]]=100-to*100; // 100 or 0    
     
     // test
-    gpio_put(gpio,to);
+    //gpio_put(gpio,to);
 }
 
 
@@ -254,6 +233,41 @@ bool Signal::handleCommand(uint8_t _address, uint8_t cmd_data[]) {
 
     }
     return false;
+}
+
+
+inline void soft_pwm(int gpio,int value) {
+    gpio_put(gpio,1);
+    sleep_us(FADE_DURATION*value);
+    gpio_put(gpio,0);
+    sleep_us(FADE_DURATION*(100-value));
+}
+
+void Signal::process() {
+    // do the fade effect for all fades in progress
+    for(int i=0; i<FADER_COUNT; i++) {
+        if(target[i] > fader[i]) {
+            fader[i]++;
+            // fade finished?
+            if(target[i]==fader[i]) {
+                gpio_put(gpios[i],1);
+            } else {
+                // partial light
+                soft_pwm(gpios[i],fader[i]);
+                
+            }
+        } else if(target[i] < fader[i]) {
+            fader[i]--;
+            // fade finished
+            if(fader[i]==0) {
+                gpio_put(gpios[i],0);
+            } else {
+                // partial light
+                soft_pwm(gpios[i],fader[i]);
+            }
+        }
+    }
+
 }
 
 

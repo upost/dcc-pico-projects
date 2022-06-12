@@ -54,7 +54,8 @@ int main() {
 
 
     Device* signals[] = {&signal1,&signal2,&signal3,&signal4};
-    DCCDetector detector(DCC_IN, signals, sizeof(signals)/sizeof(Device*) );
+    size_t signals_count =sizeof(signals)/sizeof(Device*);
+    DCCDetector detector(DCC_IN, signals,  signals_count);
 
     gpio_put(STATUS_LED,0);
 
@@ -72,6 +73,13 @@ int main() {
             
         }
         tight_loop_contents();   
+        for(int i=0; i<signals_count; i++) {
+            signals[i]->process();
+        }
+
+
+        //sleep_ms(500);
+        //detector.start();
 //       int bar = detector.timing()/10; // 5..6   or 9..10
 //       for(int i=0; i<15; i++) if(bar>i) putchar('*'); else putchar(' ');
 //        putchar('\r');

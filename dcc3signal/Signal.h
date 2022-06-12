@@ -17,14 +17,20 @@
 
 #define SIGNAL_INVERSE 1
 
+#define FADER_COUNT 5
+
+#define FADE_DURATION 2
 
 
 
 class Signal : public Device {
     private:
      int led_green,led_red1,led_red2,led_orange,led_white,mode,current,inverse;
-     int _green,_red1,_red2,_orange,_white;
-
+     uint8_t _green,_red1,_red2,_orange,_white;
+     uint8_t gpios[FADER_COUNT];
+     uint8_t fader[FADER_COUNT];
+     uint8_t target[FADER_COUNT];
+     
      void set_lights(int red1,int green,int orange, int red2, int white);
      int last();
      void start_fade(int gpio,int from,int to);
@@ -41,6 +47,8 @@ class Signal : public Device {
      void switch_next();
      
      bool handleCommand(uint8_t address, uint8_t cmd_data[]) override;
+
+     void process() override;
 
 };
 #endif
