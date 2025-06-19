@@ -8,6 +8,7 @@
 #define SIGNAL_HAUPTSIGNAL1 1
 #define SIGNAL_HAUPTSIGNAL2 2
 #define SIGNAL_AUSFAHRSIGNAL 3
+#define SIGNAL_EINFAHR 4
 
 // Konstanten für switch_to
 #define SIGNAL_HP0 0

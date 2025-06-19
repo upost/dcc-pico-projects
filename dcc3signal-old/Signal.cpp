@@ -189,6 +189,7 @@ int Signal::last() {
         case SIGNAL_HAUPTSIGNAL1: return SIGNAL_HP1;
         case SIGNAL_HAUPTSIGNAL2: return SIGNAL_HP2;
         case SIGNAL_AUSFAHRSIGNAL: return SIGNAL_HP0SH1;
+        case SIGNAL_FORM_EINFAHR: return SIGNAL_HP1;
     }
     return SIGNAL_HP2;
 }
